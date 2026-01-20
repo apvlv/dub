@@ -160,14 +160,15 @@ CREATE TABLE IF NOT EXISTS dub.links_metadata
     `key` String,
     `url` String,
     `tag_ids` Array(String),
+    `folder_id` String,
+    `tenant_id` String,
+    `program_id` String,
+    `partner_id` String,
+    `partner_group_id` String,
+    `partner_tag_ids` Array(String),
     `workspace_id` String,
     `created_at` DateTime64(3),
-    `deleted` UInt8,
-    `program_id` String,
-    `tenant_id` String,
-    `partner_id` String,
-    `folder_id` String,
-    `partner_group_id` String
+    `deleted` UInt8
 )
 ENGINE = MergeTree()
 PARTITION BY toYear(timestamp)
@@ -181,14 +182,15 @@ CREATE TABLE IF NOT EXISTS dub.links_metadata_latest
     `key` String,
     `url` String,
     `tag_ids` Array(String),
+    `folder_id` String,
+    `tenant_id` String,
+    `program_id` String,
+    `partner_id` String,
+    `partner_group_id` String,
+    `partner_tag_ids` Array(String),
     `workspace_id` String,
     `created_at` DateTime64(3),
-    `deleted` UInt8,
-    `program_id` String,
-    `tenant_id` String,
-    `partner_id` String,
-    `folder_id` String,
-    `partner_group_id` String
+    `deleted` UInt8
 )
 ENGINE = ReplacingMergeTree()
 ORDER BY (link_id);
@@ -247,10 +249,29 @@ CREATE TABLE IF NOT EXISTS dub.import_error_logs
 (
     `timestamp` DateTime64(3) DEFAULT now(),
     `workspace_id` String,
+    `import_id` String,
+    `source` LowCardinality(String),
+    `entity` LowCardinality(String),
+    `entity_id` String,
+    `code` LowCardinality(String),
+    `message` String
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (timestamp, workspace_id, import_id)
+TTL toDateTime(timestamp) + INTERVAL 30 DAY;
+
+-- ================================
+-- Conversion Events Log Table
+-- Stores conversion event debugging logs
+-- ================================
+CREATE TABLE IF NOT EXISTS dub.conversion_events_log
+(
+    `timestamp` DateTime64(3) DEFAULT now(),
+    `workspace_id` String,
     `link_id` String,
-    `domain` String,
-    `key` String,
-    `url` String,
+    `path` String,
+    `body` String,
     `error` String
 )
 ENGINE = MergeTree()

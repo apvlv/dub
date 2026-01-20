@@ -45,10 +45,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Updated Docker Compose with `USE_LOCAL_REDIS=true`
   - Unit tests in `/apps/web/tests/upstash/redis.test.ts`
 
+- **MinIO storage replacement** (2026-01-20)
+  - Updated `/apps/web/lib/storage.ts` to support MinIO
+    - Added `STORAGE_PUBLIC_ENDPOINT` for client-accessible signed URLs
+    - Server-side operations use internal `STORAGE_ENDPOINT`
+    - Client-side signed URLs use `STORAGE_PUBLIC_ENDPOINT`
+  - No code toggle needed - same `aws4fetch` library works with both R2 and MinIO
+  - MinIO service in Docker Compose with health checks and auto bucket creation
+  - Unit tests in `/apps/web/tests/storage/storage.test.ts`
+
+- **Tinybird ClickHouse replacement** (2026-01-20)
+  - ClickHouse abstraction layer in `/apps/web/lib/clickhouse/client.ts`
+    - `LocalClickHouseClient` class with same API pattern as Tinybird's zod-bird
+    - `buildIngestEndpoint()` method for data ingestion with Zod schema validation
+    - `buildPipe()` method for query execution with SQL translation
+    - `query()` and `insert()` methods for direct ClickHouse access
+    - Automatic datasource-to-table name mapping
+    - SQL query generation for all existing pipes
+  - `AnalyticsClient` class that wraps both Tinybird and local ClickHouse
+    - Toggle via `USE_LOCAL_CLICKHOUSE=true` environment variable
+    - Seamless switching between backends without code changes
+  - Updated all tinybird files to use the abstraction layer
+  - Updated `docker-compose.yml` with ClickHouse environment variables
+  - Updated `docker/init-clickhouse.sql` schema with all required tables
+  - Unit tests in `/apps/web/tests/clickhouse/client.test.ts`
+
 ### Planned
-- Replace Tinybird with self-hosted ClickHouse (schema done, client pending)
 - Replace Upstash QStash with BullMQ
-- Replace Cloudflare R2 with MinIO (server done, abstraction layer pending)
 - Replace Resend with Nodemailer + SMTP
 - Replace Vercel Edge Config with database/Redis config
 - Replace Vercel domain management with local DNS

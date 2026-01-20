@@ -10,6 +10,7 @@ import { geolocation, ipAddress, waitUntil } from "@vercel/functions";
 import { userAgent } from "next/server";
 import { recordClickCache } from "../api/links/record-click-cache";
 import { ExpandedLink, transformLink } from "../api/links/utils/transform-link";
+import { clickhouse } from "../clickhouse/client";
 import { detectBot } from "../middleware/utils/detect-bot";
 import { detectQr } from "../middleware/utils/detect-qr";
 import { getIdentityHash } from "../middleware/utils/get-identity-hash";
@@ -23,6 +24,32 @@ import {
 import { webhookCache } from "../webhook/cache";
 import { sendWebhooks } from "../webhook/qstash";
 import { transformClickEventData } from "../webhook/transform";
+
+// Environment check for local ClickHouse
+const USE_LOCAL_CLICKHOUSE = process.env.USE_LOCAL_CLICKHOUSE === "true";
+
+/**
+ * Record click event to analytics backend (Tinybird or local ClickHouse)
+ */
+async function ingestClickEvent(clickData: Record<string, any>): Promise<any> {
+  if (USE_LOCAL_CLICKHOUSE) {
+    // Use local ClickHouse
+    await clickhouse.insert("click_events", clickData);
+    return { success: true };
+  } else {
+    // Use Tinybird
+    return fetchWithRetry(
+      `${process.env.TINYBIRD_API_URL}/v0/events?name=dub_click_events&wait=true`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
+        },
+        body: JSON.stringify(clickData),
+      },
+    ).then((res) => res.json());
+  }
+}
 
 /**
  * Recording clicks with geo, ua, referer and timestamp data
@@ -176,16 +203,7 @@ export async function recordClick({
   waitUntil(
     (async () => {
       const response = await Promise.allSettled([
-        fetchWithRetry(
-          `${process.env.TINYBIRD_API_URL}/v0/events?name=dub_click_events&wait=true`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
-            },
-            body: JSON.stringify(clickData),
-          },
-        ).then((res) => res.json()),
+        ingestClickEvent(clickData),
 
         // cache the recorded click for the corresponding IP address in Redis for 1 hour
         recordClickCache.set({ domain, key, identityHash, clickId }),
@@ -234,7 +252,7 @@ export async function recordClick({
           .map((result, index) => {
             if (result.status === "rejected") {
               const operations = [
-                "Tinybird click event ingestion",
+                "Analytics click event ingestion",
                 "recordClickCache set",
                 "Link clicks increment",
                 "Workspace usage increment",

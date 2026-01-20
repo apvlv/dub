@@ -12,14 +12,14 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
-| Tinybird | ClickHouse analytics | Self-hosted ClickHouse | Pending | Stores click events, conversions, analytics data |
+| Tinybird | ClickHouse analytics | Self-hosted ClickHouse | **Complete** | Uses `@chronark/zod-bird` API pattern with `USE_LOCAL_CLICKHOUSE=true` toggle |
 
-**Files to modify:**
-- `/apps/web/lib/tinybird/client.ts`
-- `/apps/web/lib/tinybird/record-click.ts`
-- `/apps/web/lib/tinybird/record-link.ts`
-- `/apps/web/lib/tinybird/record-lead.ts`
-- `/apps/web/lib/tinybird/record-sale.ts`
+**Files modified:**
+- `/apps/web/lib/clickhouse/client.ts` - Abstraction layer supporting both Tinybird and local ClickHouse
+- `/apps/web/lib/clickhouse/index.ts` - Module exports
+- `/apps/web/lib/tinybird/client.ts` - Updated to use ClickHouse abstraction
+- `/apps/web/lib/tinybird/record-click.ts` - Uses `ingestClickEvent()` helper for both backends
+- `/apps/web/tests/clickhouse/client.test.ts` - Unit tests for environment toggle and configuration
 
 ### Caching & Rate Limiting
 
@@ -279,9 +279,38 @@ See Vibe Kanban for detailed task tracking:
   - `apps/web/.env.example` - Added `STORAGE_PUBLIC_ENDPOINT` documentation
 - Added unit tests in `/apps/web/tests/storage/storage.test.ts`
 
+### Tinybird ClickHouse Replacement (2026-01-20)
+- Created ClickHouse abstraction layer in `/apps/web/lib/clickhouse/client.ts`
+  - `LocalClickHouseClient` class with same API pattern as Tinybird's zod-bird
+  - `buildIngestEndpoint()` method for data ingestion with Zod schema validation
+  - `buildPipe()` method for query execution with SQL translation
+  - `query()` and `insert()` methods for direct ClickHouse access
+  - Automatic datasource-to-table name mapping (e.g., `dub_click_events` → `click_events`)
+  - SQL query generation for all existing pipes: `get_click_event`, `get_lead_event`, `get_lead_events`, `get_webhook_events`, `get_import_error_logs`, `v2_customer_events`, `v3_group_by_link_country`
+  - Proper SQL escaping for query parameters
+- `AnalyticsClient` class that wraps both Tinybird and local ClickHouse
+  - Toggle via `USE_LOCAL_CLICKHOUSE=true` environment variable
+  - Seamless switching between backends without code changes
+- Updated `/apps/web/lib/tinybird/client.ts` to use the abstraction
+  - Exports `tb` that automatically uses the correct backend
+  - All existing tinybird imports continue to work
+- Updated `/apps/web/lib/tinybird/record-click.ts`
+  - Created `ingestClickEvent()` helper function
+  - Routes to local ClickHouse or Tinybird based on environment
+- Updated `docker-compose.yml` with ClickHouse environment variables:
+  - `USE_LOCAL_CLICKHOUSE=true`
+  - `CLICKHOUSE_URL`, `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT`
+  - `CLICKHOUSE_DATABASE`, `CLICKHOUSE_USER`, `CLICKHOUSE_PASSWORD`
+- Updated `docker/init-clickhouse.sql` schema:
+  - Added `conversion_events_log` table
+  - Updated `import_error_logs` schema to match code expectations
+  - Added `partner_tag_ids` to `links_metadata` tables
+- Updated `.env.docker.example` with ClickHouse configuration
+- Added unit tests in `/apps/web/tests/clickhouse/client.test.ts`
+
 ## In Progress
 
-- ClickHouse implementation (Tinybird replacement)
+- None
 
 ## Next Steps
 
@@ -289,5 +318,5 @@ See Vibe Kanban for detailed task tracking:
 2. ~~Implement Redis abstraction layer~~ **DONE**
 3. ~~Add environment variable toggles~~ **DONE**
 4. ~~MinIO storage replacement~~ **DONE**
-5. Implement ClickHouse client to replace Tinybird
+5. ~~Implement ClickHouse client to replace Tinybird~~ **DONE**
 6. Add BullMQ worker for background jobs (replace QStash)

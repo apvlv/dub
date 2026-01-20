@@ -35,7 +35,13 @@ services:
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
       - REDIS_URL=redis://redis:6379
+      - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_DATABASE=dub
+      - CLICKHOUSE_USER=dub
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-clickhousepassword}
       - STORAGE_ENDPOINT=http://minio:9000
       - STORAGE_PUBLIC_ENDPOINT=${STORAGE_PUBLIC_ENDPOINT:-http://localhost:9000}
       - STORAGE_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minio}
@@ -95,7 +101,13 @@ services:
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
       - REDIS_URL=redis://redis:6379
+      - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_DATABASE=dub
+      - CLICKHOUSE_USER=dub
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-clickhousepassword}
       - STORAGE_ENDPOINT=http://minio:9000
       - STORAGE_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minio}
       - STORAGE_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-miniosecret}
@@ -105,6 +117,8 @@ services:
       mysql:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      clickhouse:
         condition: service_healthy
     networks:
       - dub-network
