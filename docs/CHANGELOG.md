@@ -31,9 +31,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `docker/nginx.conf` - Nginx reverse proxy configuration
   - `docker/README.md` - Setup documentation
 
+- **Upstash Redis replacement** (2026-01-20)
+  - Redis abstraction layer in `/apps/web/lib/upstash/redis.ts`
+    - `LocalRedisClient` class using `ioredis` with same API as Upstash
+    - Supports: get, set, del, hget, hset, hgetall, lpush, rpush, sadd, smembers, sismember, zincrby, xadd, xdel, xrange, xrevrange, mget, scan, pipeline
+    - Toggle via `USE_LOCAL_REDIS=true` environment variable
+    - Timeout support with `redisWithTimeout` export
+  - Local rate limiting in `/apps/web/lib/upstash/ratelimit.ts`
+    - Sliding window algorithm using Redis sorted sets
+    - Atomic operations via Lua script
+    - Same API as Upstash Ratelimit
+  - Added `ioredis` dependency
+  - Updated Docker Compose with `USE_LOCAL_REDIS=true`
+  - Unit tests in `/apps/web/tests/upstash/redis.test.ts`
+
 ### Planned
 - Replace Tinybird with self-hosted ClickHouse (schema done, client pending)
-- Replace Upstash Redis with self-hosted Redis (server done, abstraction layer pending)
 - Replace Upstash QStash with BullMQ
 - Replace Cloudflare R2 with MinIO (server done, abstraction layer pending)
 - Replace Resend with Nodemailer + SMTP

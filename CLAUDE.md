@@ -85,7 +85,7 @@ The project is being made independent from cloud services. See `docs/IMPLEMENTAT
 | Service | Purpose | Local Alternative | Status |
 |---------|---------|-------------------|--------|
 | Tinybird | Analytics (ClickHouse) | Self-hosted ClickHouse | **Docker Ready** |
-| Upstash Redis | Caching, rate limiting | Self-hosted Redis | **Docker Ready** |
+| Upstash Redis | Caching, rate limiting | Self-hosted Redis | **Complete** (USE_LOCAL_REDIS=true) |
 | Upstash QStash | Background jobs | BullMQ + Redis | Pending |
 | PlanetScale | MySQL database | Self-hosted MySQL | **Docker Ready** |
 | Cloudflare R2 | Object storage | MinIO | **Docker Ready** |

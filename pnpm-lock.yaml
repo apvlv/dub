@@ -58,7 +58,7 @@ importers:
         version: 1.1.21
       '@boxyhq/saml-jackson':
         specifier: 1.52.1
-        version: 1.52.1
+        version: 1.52.1(ioredis@5.9.2)
       '@chronark/zod-bird':
         specifier: ^1.0.0
         version: 1.0.0(zod@4.3.5)
@@ -251,6 +251,9 @@ importers:
       input-otp:
         specifier: ^1.2.4
         version: 1.2.4(react-dom@19.1.3)(react@19.1.3)
+      ioredis:
+        specifier: ^5.9.2
+        version: 5.9.2
       jose:
         specifier: ^6.1.0
         version: 6.1.0
@@ -2317,7 +2320,7 @@ packages:
       '@opentelemetry/semantic-conventions': 1.29.0
     dev: false
 
-  /@boxyhq/saml-jackson@1.52.1:
+  /@boxyhq/saml-jackson@1.52.1(ioredis@5.9.2):
     resolution: {integrity: sha512-wowZ5SDmHy0Uhgi6GkbLkh0UXUy8UCwZQXifk+iENauPm0RAxmM8UAFyj5k8rd8iEwN3SMdEJAFyg11hr60JAg==}
     engines: {node: '>=16', npm: '>=8'}
     dependencies:
@@ -2345,7 +2348,7 @@ packages:
       reflect-metadata: 0.2.2
       ripemd160: 2.0.2
       sqlite3: 5.1.7
-      typeorm: 0.3.22(mongodb@6.16.0)(mssql@11.0.1)(mysql2@3.14.1)(pg@8.16.0)(redis@4.7.0)(reflect-metadata@0.2.2)(sqlite3@5.1.7)
+      typeorm: 0.3.22(ioredis@5.9.2)(mongodb@6.16.0)(mssql@11.0.1)(mysql2@3.14.1)(pg@8.16.0)(redis@4.7.0)(reflect-metadata@0.2.2)(sqlite3@5.1.7)
     transitivePeerDependencies:
       - '@google-cloud/spanner'
       - '@mongodb-js/zstd'
@@ -3811,7 +3814,7 @@ packages:
     dependencies:
       '@floating-ui/dom': 1.7.4
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -4083,7 +4086,7 @@ packages:
       lucide-react: 0.454.0(react@18.3.1)
       node-fetch: 3.3.2
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
       storybook: 8.6.15(prettier@3.2.5)
       styled-jsx: 5.1.2(@babel/core@7.28.6)(babel-plugin-macros@3.1.0)(react@18.3.1)
       tailwind-merge: 2.6.0
@@ -4809,6 +4812,10 @@ packages:
     resolution: {integrity: sha512-D4OHBjrinH+PFZPvfCXvG28n2LSykWcJ7GIioQL+ok0LON15SdfoUssoHzzOUmVZLbRoREsQXVzA6r8JKsbP6A==}
     dependencies:
       '@swc/helpers': 0.5.18
+    dev: false
+
+  /@ioredis/commands@1.5.0:
+    resolution: {integrity: sha512-eUgLqrMf8nJkZxT24JvVRrQya1vZkQh8BBeYNwGDqa5I0VUi8ACx7uFvAaLxintokpTenkK6DASvo/bvNbBGow==}
     dev: false
 
   /@isaacs/balanced-match@4.0.1:
@@ -6014,7 +6021,7 @@ packages:
       '@radix-ui/react-primitive': 2.1.3(@types/react@19.2.8)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6236,7 +6243,7 @@ packages:
       '@types/react': 19.2.8
       aria-hidden: 1.2.6
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
       react-remove-scroll: 2.7.2(@types/react@19.2.8)(react@18.3.1)
     dev: false
     optional: true
@@ -6322,7 +6329,7 @@ packages:
       '@radix-ui/react-use-escape-keydown': 1.1.1(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6393,7 +6400,7 @@ packages:
       '@radix-ui/react-use-callback-ref': 1.1.1(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6624,7 +6631,7 @@ packages:
       '@radix-ui/rect': 1.1.1
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6687,7 +6694,7 @@ packages:
       '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6750,7 +6757,7 @@ packages:
       '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6810,7 +6817,7 @@ packages:
       '@radix-ui/react-slot': 1.2.3(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6850,7 +6857,7 @@ packages:
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -6928,7 +6935,7 @@ packages:
       '@radix-ui/react-primitive': 2.1.4(@types/react@19.2.8)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -7079,7 +7086,7 @@ packages:
       '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.2.8)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -7141,7 +7148,7 @@ packages:
       '@radix-ui/react-visually-hidden': 1.2.3(@types/react@19.2.8)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -7477,7 +7484,7 @@ packages:
       '@radix-ui/react-primitive': 2.1.3(@types/react@19.2.8)(react-dom@18.3.1)(react@18.3.1)
       '@types/react': 19.2.8
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
     dev: false
     optional: true
 
@@ -9459,7 +9466,7 @@ packages:
       storybook: ^8.6.15
     dependencies:
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
       storybook: 8.6.15(prettier@3.2.5)
     dev: false
     optional: true
@@ -9501,7 +9508,7 @@ packages:
       magic-string: 0.30.21
       react: 18.3.1
       react-docgen: 7.1.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
       resolve: 1.22.11
       storybook: 8.6.15(prettier@3.2.5)
       tsconfig-paths: 4.2.0
@@ -9537,7 +9544,7 @@ packages:
       '@storybook/test': 8.6.15(storybook@8.6.15)
       '@storybook/theming': 8.6.15(storybook@8.6.15)
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 18.3.1(react@19.1.3)
       storybook: 8.6.15(prettier@3.2.5)
       typescript: 4.7.4
     dev: false
@@ -11950,7 +11957,7 @@ packages:
       '@babel/plugin-syntax-jsx': 7.28.6(@babel/core@7.28.6)
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 6.3.8(react-dom@19.1.3)(react@19.1.3)
+      styled-components: 6.3.8(react-dom@18.3.1)(react@19.1.3)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -15468,6 +15475,7 @@ packages:
   /generator-function@2.0.1:
     resolution: {integrity: sha512-SFdFmIJi+ybC0vjlHN0ZGVGHc3lgE0DxPAT0djjVg+kjOnSqclqmj0KQ7ykTOLP6YxoqOvuAODGdcHJn+43q3g==}
     engines: {node: '>= 0.4'}
+    requiresBuild: true
 
   /generic-pool@3.9.0:
     resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
@@ -16307,6 +16315,23 @@ packages:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
     dependencies:
       loose-envify: 1.4.0
+    dev: false
+
+  /ioredis@5.9.2:
+    resolution: {integrity: sha512-tAAg/72/VxOUW7RQSX1pIxJVucYKcjFjfvj60L57jrZpYCHC3XN0WCQ3sNYL4Gmvv+7GPvTAjc+KSdeNuE8oWQ==}
+    engines: {node: '>=12.22.0'}
+    dependencies:
+      '@ioredis/commands': 1.5.0
+      cluster-key-slot: 1.1.2
+      debug: 4.4.3
+      denque: 2.1.0
+      lodash.defaults: 4.2.0
+      lodash.isarguments: 3.1.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /ip-address@10.1.0:
@@ -17776,6 +17801,10 @@ packages:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
     dev: false
 
+  /lodash.defaults@4.2.0:
+    resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
+    dev: false
+
   /lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
     deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
@@ -17783,6 +17812,10 @@ packages:
 
   /lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
+    dev: false
+
+  /lodash.isarguments@3.1.0:
+    resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
     dev: false
 
   /lodash.isboolean@3.0.3:
@@ -20651,6 +20684,18 @@ packages:
     dev: false
     optional: true
 
+  /react-dom@18.3.1(react@19.1.3):
+    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+    requiresBuild: true
+    peerDependencies:
+      react: ^18.3.1
+    dependencies:
+      loose-envify: 1.4.0
+      react: 19.1.3
+      scheduler: 0.23.2
+    dev: false
+    optional: true
+
   /react-dom@19.1.3(react@19.1.3):
     resolution: {integrity: sha512-stZrJtR8ovt0w3Dn8kTWwcx8hGHMhwjYOcv7hyzPPX/Ym+yl+Z39XFa+1meucWq0FgxF5IIE3h93SYP1kWB0tg==}
     peerDependencies:
@@ -21039,6 +21084,18 @@ packages:
       strip-indent: 3.0.0
     dev: false
     optional: true
+
+  /redis-errors@1.2.0:
+    resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
+    engines: {node: '>=4'}
+    dev: false
+
+  /redis-parser@3.0.0:
+    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
+    engines: {node: '>=4'}
+    dependencies:
+      redis-errors: 1.2.0
+    dev: false
 
   /redis@4.7.0:
     resolution: {integrity: sha512-zvmkHEAdGMn+hMRXuMBtu4Vo5P6rHQjLoHftu+lBqq8ZTA3RCVC/WzD790bkKKiNFp7d5/9PcSD19fJyyRvOdQ==}
@@ -22062,6 +22119,10 @@ packages:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
     dev: true
 
+  /standard-as-callback@2.1.0:
+    resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
+    dev: false
+
   /statuses@2.0.1:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
     engines: {node: '>= 0.8'}
@@ -22369,7 +22430,7 @@ packages:
       inline-style-parser: 0.2.7
     dev: false
 
-  /styled-components@6.3.8(react-dom@19.1.3)(react@19.1.3):
+  /styled-components@6.3.8(react-dom@18.3.1)(react@19.1.3):
     resolution: {integrity: sha512-Kq/W41AKQloOqKM39zfaMdJ4BcYDw/N5CIq4/GTI0YjU6pKcZ1KKhk6b4du0a+6RA9pIfOP/eu94Ge7cu+PDCA==}
     engines: {node: '>= 16'}
     peerDependencies:
@@ -22386,7 +22447,7 @@ packages:
       csstype: 3.2.3
       postcss: 8.4.49
       react: 19.1.3
-      react-dom: 19.1.3(react@19.1.3)
+      react-dom: 18.3.1(react@19.1.3)
       shallowequal: 1.1.0
       stylis: 4.3.6
       tslib: 2.8.1
@@ -23278,7 +23339,7 @@ packages:
     dependencies:
       is-typedarray: 1.0.0
 
-  /typeorm@0.3.22(mongodb@6.16.0)(mssql@11.0.1)(mysql2@3.14.1)(pg@8.16.0)(redis@4.7.0)(reflect-metadata@0.2.2)(sqlite3@5.1.7):
+  /typeorm@0.3.22(ioredis@5.9.2)(mongodb@6.16.0)(mssql@11.0.1)(mysql2@3.14.1)(pg@8.16.0)(redis@4.7.0)(reflect-metadata@0.2.2)(sqlite3@5.1.7):
     resolution: {integrity: sha512-P/Tsz3UpJ9+K0oryC0twK5PO27zejLYYwMsE8SISfZc1lVHX+ajigiOyWsKbuXpEFMjD9z7UjLzY3+ElVOMMDA==}
     engines: {node: '>=16.13.0'}
     hasBin: true
@@ -23345,6 +23406,7 @@ packages:
       debug: 4.4.3
       dotenv: 16.6.1
       glob: 10.5.0
+      ioredis: 5.9.2
       mongodb: 6.16.0(@aws-sdk/credential-providers@3.817.0)
       mssql: 11.0.1
       mysql2: 3.14.1

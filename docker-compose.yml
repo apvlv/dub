@@ -33,6 +33,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
+      - USE_LOCAL_REDIS=true
       - REDIS_URL=redis://redis:6379
       - CLICKHOUSE_URL=http://clickhouse:8123
       - STORAGE_ENDPOINT=http://minio:9000
@@ -91,6 +92,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
+      - USE_LOCAL_REDIS=true
       - REDIS_URL=redis://redis:6379
       - CLICKHOUSE_URL=http://clickhouse:8123
       - STORAGE_ENDPOINT=http://minio:9000

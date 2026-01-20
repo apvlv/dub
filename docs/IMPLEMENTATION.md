@@ -25,12 +25,12 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
-| Upstash Redis | Caching, rate limiting | Self-hosted Redis | Pending | Used for session cache, link metadata, rate limiting |
+| Upstash Redis | Caching, rate limiting | Self-hosted Redis | **Complete** | Uses `ioredis` with `USE_LOCAL_REDIS=true` toggle |
 
-**Files to modify:**
-- `/apps/web/lib/upstash/redis.ts`
-- `/apps/web/lib/upstash/ratelimit.ts`
-- `/apps/web/lib/upstash/redis-streams.ts`
+**Files modified:**
+- `/apps/web/lib/upstash/redis.ts` - Abstraction layer supporting both Upstash REST API and standard Redis
+- `/apps/web/lib/upstash/ratelimit.ts` - Rate limiting with sliding window algorithm for local Redis
+- `/apps/web/tests/upstash/redis.test.ts` - Unit tests for duration parsing and environment toggle
 
 ### Background Jobs
 
@@ -240,15 +240,30 @@ See Vibe Kanban for detailed task tracking:
 - Created `docker/nginx.conf` for reverse proxy
 - Created `docker/README.md` with setup documentation
 
+### Upstash Redis Replacement (2026-01-20)
+- Created Redis abstraction layer in `/apps/web/lib/upstash/redis.ts`
+  - `LocalRedisClient` class wrapping `ioredis` with same API as Upstash
+  - Supports all Redis operations: get, set, del, hget, hset, hgetall, lpush, rpush, sadd, smembers, sismember, zincrby, xadd, xdel, xrange, xrevrange, mget, scan, pipeline
+  - Timeout support with `redisWithTimeout` export
+  - Toggle via `USE_LOCAL_REDIS=true` environment variable
+- Created local rate limiting implementation in `/apps/web/lib/upstash/ratelimit.ts`
+  - `LocalRatelimitWithRedis` class using sliding window algorithm
+  - Atomic operations via Lua script for thread safety
+  - Fallback implementation if Lua script fails
+  - Same API as Upstash Ratelimit: `limit(identifier)` returns `{ success, limit, remaining, reset }`
+- Added `ioredis` dependency to web app
+- Updated `docker-compose.yml` to include `USE_LOCAL_REDIS=true`
+- Updated `.env.docker.example` with Redis toggle documentation
+- Added unit tests in `/apps/web/tests/upstash/redis.test.ts`
+
 ## In Progress
 
-- Redis abstraction layer
 - Storage abstraction layer
 
 ## Next Steps
 
 1. ~~Create Docker Compose configuration~~ **DONE**
-2. Implement Redis abstraction layer
-3. Add environment variable toggles
+2. ~~Implement Redis abstraction layer~~ **DONE**
+3. ~~Add environment variable toggles~~ **DONE**
 4. Implement ClickHouse client to replace Tinybird
-5. Add BullMQ worker for background jobs
+5. Add BullMQ worker for background jobs (replace QStash)
