@@ -1,0 +1,122 @@
+# Dub Development Docker Compose Overrides
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# This configuration:
+#   - Uses development mode for the app
+#   - Mounts source code for hot reloading
+#   - Enables debug logging
+#   - Opens additional ports for debugging
+
+services:
+  # ===================
+  # Development App (with hot reloading)
+  # ===================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        - NODE_ENV=development
+    environment:
+      - NODE_ENV=development
+      - DEBUG=*
+      - NEXT_PUBLIC_APP_DOMAIN=localhost:8888
+      - NEXT_PUBLIC_APP_SHORT_DOMAIN=localhost:8888
+      - PLANETSCALE_DATABASE_URL=http://dub:${MYSQL_PASSWORD:-dubpassword}@planetscale-proxy:3900/dub
+    volumes:
+      - ./apps/web:/app/apps/web:cached
+      - ./packages:/app/packages:cached
+      - /app/node_modules
+      - /app/apps/web/node_modules
+      - /app/apps/web/.next
+    ports:
+      - "8888:3000"
+      - "9229:9229"  # Node.js debugger
+    command: ["pnpm", "dev"]
+    profiles: []  # Override to always run
+
+  # ===================
+  # Enable PlanetScale Proxy for development
+  # ===================
+  planetscale-proxy:
+    profiles: []  # Override to always run
+
+  # ===================
+  # MySQL with development settings
+  # ===================
+  mysql:
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --max_connections=1000
+      - --general-log=1
+      - --general-log-file=/var/lib/mysql/general.log
+
+  # ===================
+  # Redis with verbose logging
+  # ===================
+  redis:
+    command: redis-server --appendonly yes --loglevel verbose
+
+  # ===================
+  # ClickHouse with query logging
+  # ===================
+  clickhouse:
+    environment:
+      CLICKHOUSE_DB: dub
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+
+  # ===================
+  # Prisma Studio (Database GUI)
+  # ===================
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: dub-prisma-studio
+    command: ["pnpm", "prisma:studio"]
+    environment:
+      - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
+    ports:
+      - "5555:5555"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - dub-network
+
+  # ===================
+  # Redis Commander (Redis GUI)
+  # ===================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: dub-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - dub-network
+
+  # ===================
+  # Disable worker in development (run separately if needed)
+  # ===================
+  worker:
+    profiles:
+      - worker-dev
+
+  # ===================
+  # Disable Traefik in development
+  # ===================
+  traefik:
+    profiles:
+      - never

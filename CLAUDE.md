@@ -33,6 +33,12 @@ pnpm prisma:format        # Format schema files
 # Linting & Formatting
 pnpm lint                 # Lint all packages
 pnpm format               # Format code with Prettier
+
+# Docker (Self-Hosting)
+docker compose up -d                                              # Start all services
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up # Development mode
+docker compose exec app pnpm prisma:push                          # Initialize database
+docker compose down                                               # Stop services
 ```
 
 ## Project Structure
@@ -78,16 +84,18 @@ The project is being made independent from cloud services. See `docs/IMPLEMENTAT
 
 | Service | Purpose | Local Alternative | Status |
 |---------|---------|-------------------|--------|
-| Tinybird | Analytics (ClickHouse) | Self-hosted ClickHouse | Pending |
-| Upstash Redis | Caching, rate limiting | Self-hosted Redis | Pending |
+| Tinybird | Analytics (ClickHouse) | Self-hosted ClickHouse | **Docker Ready** |
+| Upstash Redis | Caching, rate limiting | Self-hosted Redis | **Docker Ready** |
 | Upstash QStash | Background jobs | BullMQ + Redis | Pending |
-| PlanetScale | MySQL database | Self-hosted MySQL | Pending |
-| Cloudflare R2 | Object storage | MinIO | Pending |
-| Resend | Email | Nodemailer + SMTP | Pending |
-| Vercel | Platform, domains | Docker + Nginx | Pending |
+| PlanetScale | MySQL database | Self-hosted MySQL | **Docker Ready** |
+| Cloudflare R2 | Object storage | MinIO | **Docker Ready** |
+| Resend | Email | Nodemailer + SMTP | **Docker Ready** |
+| Vercel | Platform, domains | Docker + Nginx | **Docker Ready** |
 | Vercel Edge Config | Feature flags | Database/Redis | Pending |
 | Axiom | Logging | File logs/Loki | Pending |
 | Plain | Customer support | Optional/disabled | Pending |
+
+**Docker Compose Setup**: Complete! See `docker-compose.yml` and `docker/README.md`.
 
 ## Testing
 

@@ -1,4 +1,16 @@
-# This is meant for local development only. Do not use this in production.
+# DEPRECATED: This file is kept for backwards compatibility.
+#
+# For self-hosting, use the root docker-compose.yml instead:
+#   cd ../.. && docker compose up -d
+#
+# For development with the new setup:
+#   cd ../.. && docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# See /docker/README.md for documentation.
+#
+# This minimal configuration can still be used for basic local development
+# if you only need MySQL, PlanetScale proxy, and email testing.
+
 version: "3.8"
 
 services:

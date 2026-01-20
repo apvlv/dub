@@ -143,25 +143,60 @@ MINIO_SECRET_KEY=...
 
 ## Docker Compose Setup
 
-A Docker Compose configuration will be provided for self-hosting:
+A comprehensive Docker Compose configuration is now available for self-hosting. See the files in the root directory:
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Production configuration with all services |
+| `docker-compose.dev.yml` | Development overrides with hot reloading |
+| `Dockerfile` | Multi-stage build for the Next.js app |
+| `.env.docker.example` | Environment variable template |
+| `docker/init-mysql.sql` | MySQL initialization script |
+| `docker/init-clickhouse.sql` | ClickHouse schema (replaces Tinybird) |
+| `docker/nginx.conf` | Nginx reverse proxy configuration |
+| `docker/README.md` | Docker setup documentation |
+
+### Quick Start
+
+```bash
+# 1. Copy environment template
+cp .env.docker.example .env.docker
+
+# 2. Generate NEXTAUTH_SECRET
+echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)" >> .env.docker
+
+# 3. Start services
+docker compose up -d
+
+# 4. Initialize database
+docker compose exec app pnpm prisma:push
+```
+
+### Services
 
 ```yaml
 services:
-  dub:
-    # Main application
-  mysql:
-    # Database
-  redis:
-    # Caching & jobs
-  clickhouse:
-    # Analytics
-  minio:
-    # Object storage
-  mailhog:
-    # Email testing (dev)
+  app:           # Next.js application (port 8888)
+  mysql:         # MySQL 8.0 database (port 3306)
+  redis:         # Redis 7 for caching & queues (port 6379)
+  clickhouse:    # ClickHouse 24.3 for analytics (port 8123)
+  minio:         # MinIO for S3-compatible storage (ports 9000, 9001)
+  mailhog:       # Email testing (SMTP 1025, UI 8025)
+  worker:        # BullMQ background worker (optional)
+  traefik:       # Reverse proxy with SSL (optional, ports 80, 443)
 ```
 
-See `/docker-compose.yml` (to be created) for full configuration.
+### Development Mode
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+Development mode adds:
+- Hot reloading with mounted source code
+- Prisma Studio at http://localhost:5555
+- Redis Commander at http://localhost:8081
+- Debug logging enabled
 
 ## Priority Order
 
@@ -195,14 +230,25 @@ See Vibe Kanban for detailed task tracking:
 
 ## Completed Tasks
 
-None yet.
+### Docker Compose Setup (2026-01-20)
+- Created `docker-compose.yml` with all required services
+- Created `docker-compose.dev.yml` for development with hot reloading
+- Created multi-stage `Dockerfile` for production builds
+- Created `.env.docker.example` environment template
+- Created `docker/init-mysql.sql` for database initialization
+- Created `docker/init-clickhouse.sql` with full analytics schema
+- Created `docker/nginx.conf` for reverse proxy
+- Created `docker/README.md` with setup documentation
 
 ## In Progress
 
-None yet.
+- Redis abstraction layer
+- Storage abstraction layer
 
 ## Next Steps
 
-1. Create Docker Compose configuration
+1. ~~Create Docker Compose configuration~~ **DONE**
 2. Implement Redis abstraction layer
 3. Add environment variable toggles
+4. Implement ClickHouse client to replace Tinybird
+5. Add BullMQ worker for background jobs
