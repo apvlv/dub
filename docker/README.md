@@ -150,14 +150,19 @@ docker compose exec app pnpm test
 | `MYSQL_ROOT_PASSWORD` | rootpassword | MySQL root password |
 | `MYSQL_PASSWORD` | dubpassword | MySQL app password |
 
-### Storage
+### Storage (MinIO - S3 Compatible)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MINIO_ROOT_USER` | minio | MinIO access key |
 | `MINIO_ROOT_PASSWORD` | miniosecret | MinIO secret key |
+| `STORAGE_ENDPOINT` | http://minio:9000 | Internal endpoint (Docker network) |
+| `STORAGE_PUBLIC_ENDPOINT` | http://localhost:9000 | Public endpoint (browser-accessible signed URLs) |
+| `STORAGE_BASE_URL` | http://localhost:9000/dub-public | Base URL for stored files |
 | `STORAGE_PUBLIC_BUCKET` | dub-public | Public files bucket |
 | `STORAGE_PRIVATE_BUCKET` | dub-private | Private files bucket |
+
+**Note:** `STORAGE_ENDPOINT` is used for server-side operations (upload, delete) within the Docker network. `STORAGE_PUBLIC_ENDPOINT` is used for generating signed URLs that browsers can access.
 
 ## Troubleshooting
 

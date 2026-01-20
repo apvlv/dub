@@ -57,10 +57,11 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
-| Cloudflare R2 | File storage | MinIO (S3-compatible) | Pending | Project logos, avatars, custom images |
+| Cloudflare R2 | File storage | MinIO (S3-compatible) | **Complete** | Uses `aws4fetch` with path-style URLs |
 
-**Files to modify:**
-- `/apps/web/lib/storage.ts`
+**Files modified:**
+- `/apps/web/lib/storage.ts` - Added `STORAGE_PUBLIC_ENDPOINT` support for signed URLs
+- `/apps/web/tests/storage/storage.test.ts` - Unit tests for configuration
 
 ### Email
 
@@ -134,11 +135,17 @@ SMTP_PORT=587
 SMTP_USER=...
 SMTP_PASS=...
 
-# Use local MinIO instead of R2
-USE_LOCAL_STORAGE=true
-MINIO_ENDPOINT=http://localhost:9000
-MINIO_ACCESS_KEY=...
-MINIO_SECRET_KEY=...
+# Use MinIO instead of R2 (no toggle needed, just configure endpoints)
+# Internal endpoint for server-side operations (Docker network)
+STORAGE_ENDPOINT=http://minio:9000
+# Public endpoint for client-side signed URLs (browser-accessible)
+STORAGE_PUBLIC_ENDPOINT=http://localhost:9000
+STORAGE_ACCESS_KEY_ID=minio
+STORAGE_SECRET_ACCESS_KEY=miniosecret
+# Base URL for accessing stored files
+STORAGE_BASE_URL=http://localhost:9000/dub-public
+STORAGE_PUBLIC_BUCKET=dub-public
+STORAGE_PRIVATE_BUCKET=dub-private
 ```
 
 ## Docker Compose Setup
@@ -256,14 +263,31 @@ See Vibe Kanban for detailed task tracking:
 - Updated `.env.docker.example` with Redis toggle documentation
 - Added unit tests in `/apps/web/tests/upstash/redis.test.ts`
 
+### MinIO Storage Replacement (2026-01-20)
+- Updated `/apps/web/lib/storage.ts` to support MinIO:
+  - Added `STORAGE_PUBLIC_ENDPOINT` for client-accessible signed URLs
+  - Server-side operations (upload, delete) use internal `STORAGE_ENDPOINT`
+  - Client-side signed URLs use `STORAGE_PUBLIC_ENDPOINT` (falls back to `STORAGE_ENDPOINT`)
+  - No code toggle needed - same `aws4fetch` library works with both R2 and MinIO
+- Docker Compose already includes MinIO setup:
+  - `minio` service with health checks
+  - `minio-init` service for automatic bucket creation
+  - Buckets: `dub-public` (public download) and `dub-private` (restricted)
+- Updated environment configuration:
+  - `docker-compose.yml` - Added `STORAGE_PUBLIC_ENDPOINT` variable
+  - `.env.docker.example` - Documented MinIO configuration
+  - `apps/web/.env.example` - Added `STORAGE_PUBLIC_ENDPOINT` documentation
+- Added unit tests in `/apps/web/tests/storage/storage.test.ts`
+
 ## In Progress
 
-- Storage abstraction layer
+- ClickHouse implementation (Tinybird replacement)
 
 ## Next Steps
 
 1. ~~Create Docker Compose configuration~~ **DONE**
 2. ~~Implement Redis abstraction layer~~ **DONE**
 3. ~~Add environment variable toggles~~ **DONE**
-4. Implement ClickHouse client to replace Tinybird
-5. Add BullMQ worker for background jobs (replace QStash)
+4. ~~MinIO storage replacement~~ **DONE**
+5. Implement ClickHouse client to replace Tinybird
+6. Add BullMQ worker for background jobs (replace QStash)

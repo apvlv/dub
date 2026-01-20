@@ -88,7 +88,7 @@ The project is being made independent from cloud services. See `docs/IMPLEMENTAT
 | Upstash Redis | Caching, rate limiting | Self-hosted Redis | **Complete** (USE_LOCAL_REDIS=true) |
 | Upstash QStash | Background jobs | BullMQ + Redis | Pending |
 | PlanetScale | MySQL database | Self-hosted MySQL | **Docker Ready** |
-| Cloudflare R2 | Object storage | MinIO | **Docker Ready** |
+| Cloudflare R2 | Object storage | MinIO | **Complete** (STORAGE_PUBLIC_ENDPOINT) |
 | Resend | Email | Nodemailer + SMTP | **Docker Ready** |
 | Vercel | Platform, domains | Docker + Nginx | **Docker Ready** |
 | Vercel Edge Config | Feature flags | Database/Redis | Pending |

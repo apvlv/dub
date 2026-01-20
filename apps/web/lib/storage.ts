@@ -22,6 +22,21 @@ class StorageClient {
     });
   }
 
+  /**
+   * Get the internal endpoint (for server-side operations within Docker network)
+   */
+  private get internalEndpoint(): string {
+    return process.env.STORAGE_ENDPOINT || "";
+  }
+
+  /**
+   * Get the public endpoint (for client-side signed URLs)
+   * Falls back to STORAGE_ENDPOINT if not specified
+   */
+  private get publicEndpoint(): string {
+    return process.env.STORAGE_PUBLIC_ENDPOINT || this.internalEndpoint;
+  }
+
   async upload({
     key,
     body,
@@ -56,8 +71,9 @@ class StorageClient {
     }
 
     try {
+      // Use internal endpoint for server-side uploads
       const response = await this.client.fetch(
-        `${process.env.STORAGE_ENDPOINT}/${this._getBucketName(bucket)}/${key}`,
+        `${this.internalEndpoint}/${this._getBucketName(bucket)}/${key}`,
         {
           method: "PUT",
           headers,
@@ -86,8 +102,9 @@ class StorageClient {
     bucket?: BucketType;
   }) {
     try {
+      // Use internal endpoint for server-side deletes
       const response = await this.client.fetch(
-        `${process.env.STORAGE_ENDPOINT}/${this._getBucketName(bucket)}/${key}`,
+        `${this.internalEndpoint}/${this._getBucketName(bucket)}/${key}`,
         {
           method: "DELETE",
         },
@@ -113,8 +130,9 @@ class StorageClient {
     bucket: BucketType;
     expiresIn: number;
   }) {
+    // Use the public endpoint for signed URLs since they will be accessed by clients
     const url = new URL(
-      `${process.env.STORAGE_ENDPOINT}/${this._getBucketName(bucket)}/${key}`,
+      `${this.publicEndpoint}/${this._getBucketName(bucket)}/${key}`,
     );
 
     url.searchParams.set("X-Amz-Expires", String(expiresIn));
