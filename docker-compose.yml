@@ -34,6 +34,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
+      - USE_LOCAL_QUEUE=true
       - REDIS_URL=redis://redis:6379
       - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123
@@ -100,6 +101,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
+      - USE_LOCAL_QUEUE=true
       - REDIS_URL=redis://redis:6379
       - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123

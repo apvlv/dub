@@ -1,5 +1,9 @@
 import { APP_DOMAIN_WITH_NGROK, log } from "@dub/utils";
 import { Client } from "@upstash/workflow";
+import { enqueueWorkflows as enqueueWorkflowsBullMQ } from "@/lib/queue";
+
+// Environment check for local queue
+const USE_LOCAL_QUEUE = process.env.USE_LOCAL_QUEUE === "true";
 
 const client = new Client({
   token: process.env.QSTASH_TOKEN || "",
@@ -22,6 +26,27 @@ export async function triggerWorkflows(
   try {
     const workflows = Array.isArray(input) ? input : [input];
 
+    // Use BullMQ for local queue
+    if (USE_LOCAL_QUEUE) {
+      const results = await enqueueWorkflowsBullMQ(
+        workflows.map((workflow) => ({
+          workflowId: workflow.workflowId,
+          body: workflow.body,
+        })),
+      );
+
+      if (process.env.NODE_ENV === "development") {
+        console.debug("[BullMQ] Workflows triggered", {
+          count: workflows.length,
+          ids: workflows.map((w) => w.workflowId),
+          results,
+        });
+      }
+
+      return results;
+    }
+
+    // Use QStash for cloud deployments
     const results = await client.trigger(
       workflows.map((workflow) => ({
         url: `${APP_DOMAIN_WITH_NGROK}/api/workflows/${workflow.workflowId}`,
@@ -47,13 +72,13 @@ export async function triggerWorkflows(
     const message =
       error instanceof Error ? error.message : JSON.stringify(error);
 
-    console.error("[Upstash] Failed to trigger workflows", {
+    console.error("[Queue] Failed to trigger workflows", {
       error: message,
       input,
     });
 
     await log({
-      message: `[Upstash] Failed to trigger QStash workflows. ${message}`,
+      message: `[Queue] Failed to trigger workflows. ${message}`,
       type: "errors",
     });
 

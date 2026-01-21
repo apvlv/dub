@@ -2,6 +2,9 @@ import { log } from "@dub/utils";
 import { Receiver } from "@upstash/qstash";
 import { DubApiError } from "../api/errors";
 
+// Environment check for local queue
+const USE_LOCAL_QUEUE = process.env.USE_LOCAL_QUEUE === "true";
+
 // we're using Upstash's Receiver to verify the request signature
 const receiver = new Receiver({
   currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY || "",
@@ -15,6 +18,15 @@ export const verifyQstashSignature = async ({
   req: Request;
   rawBody: string; // Make sure to pass the raw body not the parsed JSON
 }) => {
+  // Skip verification for local queue requests
+  if (USE_LOCAL_QUEUE) {
+    const queueSource = req.headers.get("X-Queue-Source");
+    if (queueSource === "bullmq") {
+      // Request is from local BullMQ worker, allow it
+      return;
+    }
+  }
+
   // skip verification in local development
   if (process.env.VERCEL !== "1") {
     return;

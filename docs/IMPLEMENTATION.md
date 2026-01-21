@@ -36,12 +36,25 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
-| Upstash QStash | Job queue, workflows | BullMQ + Redis | Pending | Async tasks, webhook delivery, workflow orchestration |
+| Upstash QStash | Job queue, workflows | BullMQ + Redis | **Complete** | Uses `USE_LOCAL_QUEUE=true` toggle, separate worker process |
 
-**Files to modify:**
-- `/apps/web/lib/cron/qstash-workflow.ts`
-- `/apps/web/lib/cron/verify-qstash.ts`
-- `/apps/web/lib/webhook/qstash.ts`
+**Files modified:**
+- `/apps/web/lib/queue/` - New queue abstraction layer
+  - `index.ts` - Module exports
+  - `client.ts` - Queue client with BullMQ/QStash toggle
+  - `types.ts` - Type definitions for jobs
+  - `jobs.ts` - Helper functions for enqueueing jobs
+  - `workers/` - BullMQ worker processors
+    - `webhook-worker.ts` - Webhook delivery with retry
+    - `workflow-worker.ts` - Workflow orchestration
+    - `batch-worker.ts` - Batch job processing
+    - `handlers/partner-approved.ts` - Partner workflow implementation
+- `/apps/web/lib/cron/qstash-workflow.ts` - Updated with BullMQ toggle
+- `/apps/web/lib/cron/verify-qstash.ts` - Updated to allow local queue requests
+- `/apps/web/lib/cron/enqueue-batch-jobs.ts` - Updated with BullMQ toggle
+- `/apps/web/lib/webhook/qstash.ts` - Updated webhook delivery with BullMQ toggle
+- `/apps/web/worker.ts` - Worker process entry point
+- `/apps/web/tests/queue/client.test.ts` - Unit tests for queue types
 
 ### Database
 
@@ -123,6 +136,10 @@ Example environment variable pattern:
 # Use local Redis instead of Upstash
 USE_LOCAL_REDIS=true
 REDIS_URL=redis://localhost:6379
+
+# Use local BullMQ queue instead of QStash
+USE_LOCAL_QUEUE=true
+# Note: Uses the same REDIS_URL as above
 
 # Use local ClickHouse instead of Tinybird
 USE_LOCAL_CLICKHOUSE=true
@@ -308,6 +325,34 @@ See Vibe Kanban for detailed task tracking:
 - Updated `.env.docker.example` with ClickHouse configuration
 - Added unit tests in `/apps/web/tests/clickhouse/client.test.ts`
 
+### Upstash QStash Replacement (2026-01-21)
+- Created queue abstraction layer in `/apps/web/lib/queue/`
+  - `QueueClient` class supporting both QStash and BullMQ
+  - `getQueue()` and `createWorker()` helpers for BullMQ
+  - Toggle via `USE_LOCAL_QUEUE=true` environment variable
+  - Shares Redis connection with caching (`REDIS_URL`)
+- Created job types and helper functions:
+  - `enqueueWebhook()` / `enqueueWebhooks()` - Webhook delivery
+  - `enqueueWorkflow()` / `enqueueWorkflows()` - Workflow triggering
+  - `enqueueBatchJob()` / `enqueueBatchJobs()` - Batch job processing
+- Created BullMQ workers:
+  - `webhook-worker.ts` - Delivers webhooks with retry, records events
+  - `workflow-worker.ts` - Executes workflow steps (e.g., partner-approved)
+  - `batch-worker.ts` - Processes batch jobs via HTTP to internal endpoints
+- Worker entry point:
+  - `/apps/web/worker.ts` - Standalone process for BullMQ workers
+  - Configurable concurrency and rate limiting per queue
+  - Graceful shutdown handling
+- Updated existing code to support both backends:
+  - `/apps/web/lib/webhook/qstash.ts` - Webhook delivery toggle
+  - `/apps/web/lib/cron/qstash-workflow.ts` - Workflow triggering toggle
+  - `/apps/web/lib/cron/enqueue-batch-jobs.ts` - Batch jobs toggle
+  - `/apps/web/lib/cron/verify-qstash.ts` - Allows local queue requests
+- Updated Docker Compose:
+  - Added `USE_LOCAL_QUEUE=true` to app and worker services
+  - Worker service already configured with `--profile worker`
+- Added unit tests in `/apps/web/tests/queue/client.test.ts`
+
 ## In Progress
 
 - None
@@ -319,4 +364,7 @@ See Vibe Kanban for detailed task tracking:
 3. ~~Add environment variable toggles~~ **DONE**
 4. ~~MinIO storage replacement~~ **DONE**
 5. ~~Implement ClickHouse client to replace Tinybird~~ **DONE**
-6. Add BullMQ worker for background jobs (replace QStash)
+6. ~~Add BullMQ worker for background jobs (replace QStash)~~ **DONE**
+7. Replace Resend with Nodemailer + SMTP
+8. Implement Edge Config replacement with Redis/DB
+9. Add GeoLite2 for IP geolocation

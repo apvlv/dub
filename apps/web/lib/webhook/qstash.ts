@@ -1,4 +1,5 @@
 import { qstash } from "@/lib/cron";
+import { enqueueWebhooks as enqueueWebhooksBullMQ } from "@/lib/queue";
 import { webhookPayloadSchema } from "@/lib/webhook/schemas";
 import { Webhook, WebhookReceiver } from "@dub/prisma/client";
 import { APP_DOMAIN_WITH_NGROK } from "@dub/utils";
@@ -11,6 +12,9 @@ import { createWebhookSignature } from "./signature";
 import { prepareWebhookPayload } from "./transform";
 import { WebhookEventPayload } from "./types";
 import { identifyWebhookReceiver } from "./utils";
+
+// Environment check for local queue
+const USE_LOCAL_QUEUE = process.env.USE_LOCAL_QUEUE === "true";
 
 // Send webhooks to multiple webhooks
 export const sendWebhooks = async ({
@@ -28,6 +32,22 @@ export const sendWebhooks = async ({
 
   const payload = prepareWebhookPayload(trigger, data);
 
+  // Use BullMQ for local queue
+  if (USE_LOCAL_QUEUE) {
+    return enqueueWebhooksBullMQ(
+      webhooks.map((webhook) => ({
+        webhookId: webhook.id,
+        webhookUrl: webhook.url,
+        webhookSecret: webhook.secret,
+        payload: payload as unknown as Record<string, unknown>,
+        eventId: payload.id,
+        event: payload.event,
+        receiver: identifyWebhookReceiver(webhook.url),
+      })),
+    );
+  }
+
+  // Use QStash for cloud deployments
   return await Promise.all(
     webhooks.map((webhook) =>
       publishWebhookEventToQStash({ webhook, payload }),
