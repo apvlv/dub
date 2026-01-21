@@ -1,9 +1,6 @@
-import {
-  LOCALHOST_IP,
-  REDIRECTION_QUERY_PARAM,
-} from "@dub/utils/src/constants";
+import { ipAddressOrFallback } from "@/lib/geo";
+import { REDIRECTION_QUERY_PARAM } from "@dub/utils/src/constants";
 import { getUrlFromStringIfValid } from "@dub/utils/src/functions";
-import { ipAddress } from "@vercel/functions";
 import { NextRequest, userAgent } from "next/server";
 import { isGooglePlayStoreUrl } from "./is-google-play-store-url";
 import { isSingularTrackingUrl } from "./is-singular-tracking-url";
@@ -58,7 +55,7 @@ export const getFinalUrl = (
   // for Singular tracking links
   if (isSingularTrackingUrl(url)) {
     const ua = userAgent(req);
-    const ip = process.env.VERCEL === "1" ? ipAddress(req) : LOCALHOST_IP;
+    const ip = ipAddressOrFallback(req);
     urlObj.searchParams.set("cl", clickId ?? "");
     urlObj.searchParams.set("ua", ua?.ua ?? "");
     urlObj.searchParams.set("ip", ip ?? "");

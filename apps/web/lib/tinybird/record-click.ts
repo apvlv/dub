@@ -1,12 +1,15 @@
 import {
+  geolocationExtended,
+  ipAddressOrFallback,
+} from "@/lib/geo";
+import {
   LOCALHOST_GEO_DATA,
-  LOCALHOST_IP,
   capitalize,
   fetchWithRetry,
   getDomainWithoutWWW,
 } from "@dub/utils";
 import { EU_COUNTRY_CODES } from "@dub/utils/src/constants/countries";
-import { geolocation, ipAddress, waitUntil } from "@vercel/functions";
+import { waitUntil } from "@vercel/functions";
 import { userAgent } from "next/server";
 import { recordClickCache } from "../api/links/record-click-cache";
 import { ExpandedLink, transformLink } from "../api/links/utils/transform-link";
@@ -137,20 +140,12 @@ export async function recordClick({
   }
 
   // get continent, region & geolocation data
-  // interesting, geolocation().region is Vercel's edge region – NOT the actual region
-  // so we use the x-vercel-ip-country-region to get the actual region
-  const { continent, region } =
-    process.env.VERCEL === "1"
-      ? {
-          continent: req.headers.get("x-vercel-ip-continent"),
-          region: req.headers.get("x-vercel-ip-country-region"),
-        }
-      : LOCALHOST_GEO_DATA;
+  // Uses local GeoLite2 database when USE_LOCAL_GEO=true, otherwise Vercel headers
+  const geo = await geolocationExtended(req);
+  const continent = geo.continent || LOCALHOST_GEO_DATA.continent;
+  const region = geo.region || LOCALHOST_GEO_DATA.region;
 
-  const geo =
-    process.env.VERCEL === "1" ? geolocation(req) : LOCALHOST_GEO_DATA;
-
-  const ip = process.env.VERCEL === "1" ? ipAddress(req) : LOCALHOST_IP;
+  const ip = ipAddressOrFallback(req);
   const isEuCountry = geo.country && EU_COUNTRY_CODES.includes(geo.country);
 
   const referer = referrer || req.headers.get("referer");

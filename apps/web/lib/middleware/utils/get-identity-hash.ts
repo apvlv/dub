@@ -1,12 +1,12 @@
-import { LOCALHOST_IP, hashStringSHA256 } from "@dub/utils";
-import { ipAddress } from "@vercel/functions";
+import { ipAddressOrFallback } from "@/lib/geo";
+import { hashStringSHA256 } from "@dub/utils";
 import { userAgent } from "next/server";
 
 /**
  * Combine IP + UA to create a unique identifier for the user (for deduplication)
  */
 export async function getIdentityHash(req: Request) {
-  const ip = ipAddress(req) || LOCALHOST_IP;
+  const ip = ipAddressOrFallback(req);
   const ua = userAgent(req);
   return await hashStringSHA256(`${ip}-${ua.ua}`);
 }

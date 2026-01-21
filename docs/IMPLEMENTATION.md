@@ -93,7 +93,7 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 |---------|---------|-------------|--------|-------|
 | Vercel | Hosting, domains | Docker + Nginx/Traefik | Pending | Edge functions, domain management |
 | Vercel Edge Config | Feature flags | Database/Redis config | **Complete** | Uses `USE_LOCAL_CONFIG=true` toggle with DB + Redis caching |
-| Vercel Functions | Geolocation, IP | GeoLite2 + local | Pending | IP geolocation for analytics |
+| Vercel Functions | Geolocation, IP | GeoLite2 + local | **Complete** | Uses `USE_LOCAL_GEO=true` toggle with MaxMind GeoLite2 database |
 
 **Files modified:**
 - `/apps/web/lib/config/` - New config abstraction layer
@@ -105,6 +105,24 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 - `/apps/web/lib/edge-config/*.ts` - Updated all files with local config toggle
 - `/apps/web/app/api/admin/config/route.ts` - Admin API for config management
 - `/apps/web/tests/config/client.test.ts` - Unit tests
+
+**Files modified (Vercel Functions):**
+- `/apps/web/lib/geo/` - New geolocation abstraction layer
+  - `types.ts` - Type definitions for GeoData and IpInfo
+  - `ip-address.ts` - IP extraction from request headers
+  - `local-client.ts` - Local implementation using MaxMind GeoLite2
+  - `client.ts` - Abstraction layer with environment toggle
+  - `index.ts` - Module exports
+- `/apps/web/lib/middleware/link.ts` - Updated to use geo abstraction
+- `/apps/web/lib/middleware/utils/get-identity-hash.ts` - Uses local IP detection
+- `/apps/web/lib/middleware/utils/detect-bot.ts` - Uses local IP detection
+- `/apps/web/lib/middleware/utils/get-final-url.ts` - Uses local IP detection
+- `/apps/web/lib/middleware/utils/cache-deeplink-click-data.ts` - Uses local IP detection
+- `/apps/web/lib/tinybird/record-click.ts` - Uses local geolocation with extended data
+- `/apps/web/lib/api/utils.ts` - Uses local IP detection for rate limiting
+- `/apps/web/app/(ee)/api/track/open/route.ts` - Uses local IP detection
+- `/apps/web/app/(ee)/api/shopify/pixel/route.ts` - Uses local IP detection
+- `/apps/web/tests/geo/client.test.ts` - Unit tests
 
 **Files to modify:**
 - `/apps/web/lib/api/domains/add-domain-vercel.ts`
@@ -160,6 +178,11 @@ USE_LOCAL_CONFIG=true
 # Note: Uses database for storage and Redis for caching
 # Admin API key for managing config (optional)
 ADMIN_API_KEY=your-secure-admin-key
+
+# Use local geolocation instead of Vercel Functions
+USE_LOCAL_GEO=true
+GEOLITE2_PATH=/path/to/GeoLite2-City.mmdb
+# Note: Download from https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
 
 # Use local SMTP instead of Resend
 USE_LOCAL_SMTP=true
@@ -393,6 +416,36 @@ See Vibe Kanban for detailed task tracking:
 - Toggle via `USE_LOCAL_CONFIG=true` environment variable
 - Added unit tests in `/apps/web/tests/config/client.test.ts`
 
+### Vercel Functions Geolocation Replacement (2026-01-21)
+- Created geolocation abstraction layer in `/apps/web/lib/geo/`
+  - `types.ts` - Type definitions for GeoData, ExtendedGeoData, IpInfo
+  - `ip-address.ts` - IP extraction from various proxy headers (X-Forwarded-For, CF-Connecting-IP, X-Real-IP, etc.)
+  - `local-client.ts` - `LocalConfigClient` using MaxMind GeoLite2 database
+  - `client.ts` - Abstraction layer that switches between Vercel Functions and local geo
+  - `index.ts` - Module exports
+- Features:
+  - IP extraction from multiple headers (Cloudflare, Vercel, standard proxies, Fastly, AWS ALB, Akamai)
+  - IPv4 and IPv6 validation
+  - Lazy loading of MaxMind database for performance
+  - Private IP detection (returns localhost data for 10.x, 192.168.x, 127.x, etc.)
+  - Extended geolocation with continent information
+  - Fallback to localhost data when lookup fails
+- Updated all files using `@vercel/functions`:
+  - `/apps/web/lib/middleware/link.ts` - Main link middleware
+  - `/apps/web/lib/middleware/utils/get-identity-hash.ts` - User deduplication
+  - `/apps/web/lib/middleware/utils/detect-bot.ts` - Bot detection by IP
+  - `/apps/web/lib/middleware/utils/get-final-url.ts` - Singular tracking URLs
+  - `/apps/web/lib/middleware/utils/cache-deeplink-click-data.ts` - Deep link caching
+  - `/apps/web/lib/tinybird/record-click.ts` - Click analytics with geo data
+  - `/apps/web/lib/api/utils.ts` - Rate limiting by IP
+  - `/apps/web/app/(ee)/api/track/open/route.ts` - Deep link tracking
+  - `/apps/web/app/(ee)/api/shopify/pixel/route.ts` - Shopify pixel
+- Added `@maxmind/geoip2-node` dependency to web app
+- Updated Docker Compose with `USE_LOCAL_GEO=true` and `GEOLITE2_PATH`
+- Updated `.env.docker.example` with geolocation configuration
+- Updated `apps/web/.env.example` with geolocation variables
+- Added unit tests in `/apps/web/tests/geo/client.test.ts`
+
 ## In Progress
 
 - None
@@ -406,5 +459,5 @@ See Vibe Kanban for detailed task tracking:
 5. ~~Implement ClickHouse client to replace Tinybird~~ **DONE**
 6. ~~Add BullMQ worker for background jobs (replace QStash)~~ **DONE**
 7. ~~Implement Edge Config replacement with Redis/DB~~ **DONE**
-8. Replace Resend with Nodemailer + SMTP
-9. Add GeoLite2 for IP geolocation
+8. ~~Add GeoLite2 for IP geolocation~~ **DONE**
+9. Replace Resend with Nodemailer + SMTP

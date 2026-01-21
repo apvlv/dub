@@ -1,10 +1,10 @@
 import { COMMON_CORS_HEADERS } from "@/lib/api/cors";
 import { DubApiError, handleAndReturnErrorResponse } from "@/lib/api/errors";
 import { parseRequestBody } from "@/lib/api/utils";
+import { ipAddressOrFallback } from "@/lib/geo";
 import { getClickEvent } from "@/lib/tinybird";
 import { ratelimit, redis } from "@/lib/upstash";
-import { LOCALHOST_IP } from "@dub/utils";
-import { ipAddress, waitUntil } from "@vercel/functions";
+import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
     }
 
     // Rate limit the request
-    const ip = process.env.VERCEL === "1" ? ipAddress(req) : LOCALHOST_IP;
+    const ip = ipAddressOrFallback(req);
     const { success } = await ratelimit().limit(`shopify-track-pixel:${ip}`);
 
     if (!success) {

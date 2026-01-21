@@ -1,4 +1,4 @@
-import { ipAddress } from "@vercel/functions";
+import { ipAddress } from "@/lib/geo";
 import { getToken } from "next-auth/jwt";
 import { NextRequest } from "next/server";
 import { ratelimit } from "../upstash";

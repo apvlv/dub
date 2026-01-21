@@ -56,6 +56,8 @@ services:
       - SMTP_PORT=1025
       - SMTP_USER=
       - SMTP_PASSWORD=
+      - USE_LOCAL_GEO=true
+      - GEOLITE2_PATH=/app/data/GeoLite2-City.mmdb
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:8888}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
       - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Dub}
@@ -116,6 +118,8 @@ services:
       - STORAGE_ENDPOINT=http://minio:9000
       - STORAGE_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minio}
       - STORAGE_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-miniosecret}
+      - USE_LOCAL_GEO=true
+      - GEOLITE2_PATH=/app/data/GeoLite2-City.mmdb
     env_file:
       - .env.docker
     depends_on:
