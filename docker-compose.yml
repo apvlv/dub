@@ -35,6 +35,8 @@ services:
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
       - USE_LOCAL_QUEUE=true
+      - USE_LOCAL_CONFIG=true
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-}
       - REDIS_URL=redis://redis:6379
       - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123
@@ -102,6 +104,7 @@ services:
       - DATABASE_URL=mysql://dub:${MYSQL_PASSWORD:-dubpassword}@mysql:3306/dub
       - USE_LOCAL_REDIS=true
       - USE_LOCAL_QUEUE=true
+      - USE_LOCAL_CONFIG=true
       - REDIS_URL=redis://redis:6379
       - USE_LOCAL_CLICKHOUSE=true
       - CLICKHOUSE_URL=http://clickhouse:8123

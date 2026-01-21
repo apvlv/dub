@@ -91,7 +91,7 @@ The project is being made independent from cloud services. See `docs/IMPLEMENTAT
 | Cloudflare R2 | Object storage | MinIO | **Complete** (STORAGE_PUBLIC_ENDPOINT) |
 | Resend | Email | Nodemailer + SMTP | **Docker Ready** |
 | Vercel | Platform, domains | Docker + Nginx | **Docker Ready** |
-| Vercel Edge Config | Feature flags | Database/Redis | Pending |
+| Vercel Edge Config | Feature flags | Database/Redis | **Complete** (USE_LOCAL_CONFIG=true) |
 | Axiom | Logging | File logs/Loki | Pending |
 | Plain | Customer support | Optional/disabled | Pending |
 

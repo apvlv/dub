@@ -92,13 +92,23 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
 | Vercel | Hosting, domains | Docker + Nginx/Traefik | Pending | Edge functions, domain management |
-| Vercel Edge Config | Feature flags | Database/Redis config | Pending | Blacklists, feature flags, admin config |
+| Vercel Edge Config | Feature flags | Database/Redis config | **Complete** | Uses `USE_LOCAL_CONFIG=true` toggle with DB + Redis caching |
 | Vercel Functions | Geolocation, IP | GeoLite2 + local | Pending | IP geolocation for analytics |
+
+**Files modified:**
+- `/apps/web/lib/config/` - New config abstraction layer
+  - `types.ts` - Type definitions for config keys and values
+  - `local-client.ts` - Local implementation with DB + Redis caching
+  - `client.ts` - Abstraction layer with environment toggle
+  - `index.ts` - Module exports
+- `/packages/prisma/schema/config.prisma` - Database schema for ConfigEntry model
+- `/apps/web/lib/edge-config/*.ts` - Updated all files with local config toggle
+- `/apps/web/app/api/admin/config/route.ts` - Admin API for config management
+- `/apps/web/tests/config/client.test.ts` - Unit tests
 
 **Files to modify:**
 - `/apps/web/lib/api/domains/add-domain-vercel.ts`
 - `/apps/web/lib/api/domains/remove-domain-vercel.ts`
-- `/apps/web/lib/edge-config/*.ts`
 - `/apps/web/lib/middleware/utils/parse-request.ts`
 
 ### Logging & Monitoring
@@ -144,6 +154,12 @@ USE_LOCAL_QUEUE=true
 # Use local ClickHouse instead of Tinybird
 USE_LOCAL_CLICKHOUSE=true
 CLICKHOUSE_URL=http://localhost:8123
+
+# Use local config instead of Vercel Edge Config
+USE_LOCAL_CONFIG=true
+# Note: Uses database for storage and Redis for caching
+# Admin API key for managing config (optional)
+ADMIN_API_KEY=your-secure-admin-key
 
 # Use local SMTP instead of Resend
 USE_LOCAL_SMTP=true
@@ -353,6 +369,30 @@ See Vibe Kanban for detailed task tracking:
   - Worker service already configured with `--profile worker`
 - Added unit tests in `/apps/web/tests/queue/client.test.ts`
 
+### Vercel Edge Config Replacement (2026-01-21)
+- Created config abstraction layer in `/apps/web/lib/config/`
+  - `types.ts` - Type definitions for all config keys (domains, emails, keys, referrers, betaFeatures, etc.)
+  - `local-client.ts` - `LocalConfigClient` class using database as source of truth with Redis caching
+  - `client.ts` - Abstraction layer that switches between Edge Config and local config
+  - `index.ts` - Module exports
+- Created database schema in `/packages/prisma/schema/config.prisma`
+  - `ConfigEntry` model with `key` (unique) and `value` (JSON) fields
+  - Stores all config types: blacklists, feature flags, whitelists
+- Updated all edge-config functions with local config toggle:
+  - `/apps/web/lib/edge-config/get-feature-flags.ts` - Beta feature flags
+  - `/apps/web/lib/edge-config/is-blacklisted-domain.ts` - Domain blacklisting
+  - `/apps/web/lib/edge-config/is-blacklisted-email.ts` - Email blacklisting
+  - `/apps/web/lib/edge-config/is-blacklisted-key.ts` - Short link key blacklisting
+  - `/apps/web/lib/edge-config/is-blacklisted-referrer.ts` - Referrer whitelisting
+  - `/apps/web/lib/edge-config/is-reserved-username.ts` - Reserved usernames for Pro+
+  - `/apps/web/lib/edge-config/update.ts` - Config updates with new helper functions
+- Created admin API for config management:
+  - `/apps/web/app/api/admin/config/route.ts` - CRUD operations (GET, POST, PATCH, DELETE)
+  - `/apps/web/app/api/admin/config/cache/route.ts` - Cache invalidation endpoint
+  - Secured with `ADMIN_API_KEY` environment variable
+- Toggle via `USE_LOCAL_CONFIG=true` environment variable
+- Added unit tests in `/apps/web/tests/config/client.test.ts`
+
 ## In Progress
 
 - None
@@ -365,6 +405,6 @@ See Vibe Kanban for detailed task tracking:
 4. ~~MinIO storage replacement~~ **DONE**
 5. ~~Implement ClickHouse client to replace Tinybird~~ **DONE**
 6. ~~Add BullMQ worker for background jobs (replace QStash)~~ **DONE**
-7. Replace Resend with Nodemailer + SMTP
-8. Implement Edge Config replacement with Redis/DB
+7. ~~Implement Edge Config replacement with Redis/DB~~ **DONE**
+8. Replace Resend with Nodemailer + SMTP
 9. Add GeoLite2 for IP geolocation
