@@ -1,4 +1,5 @@
 import { logger } from "@/lib/axiom/server";
+import { USE_LOCAL_LOGGING } from "@/lib/axiom/axiom";
 import { transformMiddlewareRequest } from "@axiomhq/nextjs";
 import {
   ADMIN_HOSTNAMES,
@@ -34,8 +35,27 @@ export const config = {
 export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
   const { domain, path, key, fullKey } = parse(req);
 
-  // Axiom logging
-  logger.info(...transformMiddlewareRequest(req));
+  // Request logging (Axiom or local)
+  if (USE_LOCAL_LOGGING) {
+    // Local logging - extract request details manually
+    const url = new URL(req.url);
+    logger.info(`${req.method} ${url.pathname}`, {
+      request: {
+        method: req.method,
+        url: req.url,
+        path: url.pathname,
+        host: url.host,
+        userAgent: req.headers.get("user-agent") ?? undefined,
+        ip:
+          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+          req.headers.get("x-real-ip") ??
+          undefined,
+      },
+    });
+  } else {
+    // Axiom logging
+    logger.info(...transformMiddlewareRequest(req));
+  }
   ev.waitUntil(logger.flush());
 
   // for App

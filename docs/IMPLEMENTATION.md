@@ -133,11 +133,18 @@ The goal is to replace all proprietary cloud services with self-hostable alterna
 
 | Service | Purpose | Replacement | Status | Notes |
 |---------|---------|-------------|--------|-------|
-| Axiom | Logging | File logs / Loki / Grafana | Pending | Request logging, error tracking |
+| Axiom | Logging | Local file/console logging | **Complete** | Uses `USE_LOCAL_LOGGING=true` toggle |
 
-**Files to modify:**
-- `/apps/web/lib/axiom/axiom.ts`
-- `/apps/web/lib/axiom/server.ts`
+**Files modified:**
+- `/apps/web/lib/logging/` - New logging abstraction layer
+  - `types.ts` - Type definitions for LogLevel, LogEntry, Logger interface
+  - `local-logger.ts` - `LocalLogger` class with console and file transports
+  - `index.ts` - Module exports
+- `/apps/web/lib/axiom/axiom.ts` - Added `USE_LOCAL_LOGGING` toggle
+- `/apps/web/lib/axiom/server.ts` - Unified logger with Axiom/local toggle
+- `/apps/web/middleware.ts` - Updated to use local logging for middleware requests
+- `/apps/web/instrumentation.ts` - Local error handler for Next.js errors
+- `/apps/web/tests/logging/client.test.ts` - Unit tests
 
 ### Customer Support
 
@@ -183,6 +190,12 @@ ADMIN_API_KEY=your-secure-admin-key
 USE_LOCAL_GEO=true
 GEOLITE2_PATH=/path/to/GeoLite2-City.mmdb
 # Note: Download from https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+
+# Use local logging instead of Axiom
+USE_LOCAL_LOGGING=true
+LOG_LEVEL=info                    # debug, info, warn, error
+LOG_FORMAT=json                   # json or pretty
+# LOG_FILE=/path/to/app.log       # Optional: file path for file logging
 
 # Use local SMTP instead of Resend
 USE_LOCAL_SMTP=true
@@ -446,6 +459,31 @@ See Vibe Kanban for detailed task tracking:
 - Updated `apps/web/.env.example` with geolocation variables
 - Added unit tests in `/apps/web/tests/geo/client.test.ts`
 
+### Axiom Logging Replacement (2026-01-21)
+- Created logging abstraction layer in `/apps/web/lib/logging/`
+  - `types.ts` - Type definitions: `LogLevel` enum, `LogEntry`, `Logger` interface, `LogTransport`
+  - `local-logger.ts` - `LocalLogger` class with `LocalConsoleTransport` and `LocalFileTransport`
+  - `index.ts` - Module exports
+- Features:
+  - JSON and pretty (human-readable) log formats
+  - Log level filtering (debug, info, warn, error)
+  - Console logging (stdout/stderr based on level)
+  - Optional file logging with buffering and periodic flush
+  - Compatible interface with Axiom logger
+- Updated Axiom integration with local toggle:
+  - `/apps/web/lib/axiom/axiom.ts` - Added `USE_LOCAL_LOGGING` environment toggle
+  - `/apps/web/lib/axiom/server.ts` - Unified logger that switches between Axiom and local
+- Updated route handler wrappers:
+  - `withAxiom` - Simple route handler wrapper for both backends
+  - `withAxiomBodyLog` - Enhanced wrapper with request body logging
+- Updated middleware and error handling:
+  - `/apps/web/middleware.ts` - Local logging for middleware requests
+  - `/apps/web/instrumentation.ts` - Local error handler for Next.js errors
+- Updated Docker Compose with `USE_LOCAL_LOGGING=true`, `LOG_LEVEL`, `LOG_FORMAT`
+- Updated `.env.docker.example` with logging configuration
+- Updated `apps/web/.env.example` with logging variables
+- Added unit tests in `/apps/web/tests/logging/client.test.ts`
+
 ## In Progress
 
 - None
@@ -460,4 +498,5 @@ See Vibe Kanban for detailed task tracking:
 6. ~~Add BullMQ worker for background jobs (replace QStash)~~ **DONE**
 7. ~~Implement Edge Config replacement with Redis/DB~~ **DONE**
 8. ~~Add GeoLite2 for IP geolocation~~ **DONE**
-9. Replace Resend with Nodemailer + SMTP
+9. ~~Replace Axiom with local logging~~ **DONE**
+10. Replace Resend with Nodemailer + SMTP

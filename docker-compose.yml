@@ -58,6 +58,9 @@ services:
       - SMTP_PASSWORD=
       - USE_LOCAL_GEO=true
       - GEOLITE2_PATH=/app/data/GeoLite2-City.mmdb
+      - USE_LOCAL_LOGGING=true
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:8888}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
       - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Dub}
@@ -120,6 +123,9 @@ services:
       - STORAGE_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-miniosecret}
       - USE_LOCAL_GEO=true
       - GEOLITE2_PATH=/app/data/GeoLite2-City.mmdb
+      - USE_LOCAL_LOGGING=true
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
     env_file:
       - .env.docker
     depends_on:
