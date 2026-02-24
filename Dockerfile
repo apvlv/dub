@@ -57,8 +57,8 @@ FROM base AS development
 ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
 
-# Copy dependencies
-COPY --from=dependencies /app/node_modules ./node_modules
+# Copy installed dependencies (includes per-package node_modules symlinks)
+COPY --from=dependencies /app ./
 
 # Copy source code
 COPY . .
@@ -81,8 +81,8 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy dependencies
-COPY --from=dependencies /app/node_modules ./node_modules
+# Copy installed dependencies (includes per-package node_modules symlinks)
+COPY --from=dependencies /app ./
 
 # Copy source code
 COPY . .
