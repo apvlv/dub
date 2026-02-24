@@ -6,12 +6,12 @@
   "module": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "generate": "npx prisma generate --schema=./schema",
-    "push": "npx prisma db push --schema=./schema",
-    "studio": "npx prisma studio --schema=./schema --browser none",
+    "generate": "pnpm exec prisma generate --schema=./schema",
+    "push": "pnpm exec prisma db push --schema=./schema",
+    "studio": "pnpm exec prisma studio --schema=./schema --browser none",
     "prebuild": "pnpm run generate",
     "predev": "pnpm run generate",
-    "format": "npx prisma format --schema=./schema"
+    "format": "pnpm exec prisma format --schema=./schema"
   },
   "dependencies": {
     "@planetscale/database": "1.19.0",
