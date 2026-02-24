@@ -2,10 +2,12 @@
  * Queue Client Abstraction
  *
  * Provides a unified interface for both QStash and BullMQ.
+ * BullMQ and ioredis are lazily imported to avoid bundling Node.js-only
+ * modules into Edge runtime routes.
  */
 
-import { Queue, QueueEvents, Worker, ConnectionOptions } from "bullmq";
-import IORedis from "ioredis";
+import type { Queue, QueueEvents, Worker, ConnectionOptions } from "bullmq";
+import type IORedis from "ioredis";
 import { log } from "@dub/utils";
 import {
   JobOptions,
@@ -25,9 +27,10 @@ let redisConnection: IORedis | null = null;
 /**
  * Get or create the Redis connection for BullMQ
  */
-export function getRedisConnection(): IORedis {
+export async function getRedisConnection(): Promise<IORedis> {
   if (!redisConnection) {
-    redisConnection = new IORedis(REDIS_URL, {
+    const IORedisModule = (await import("ioredis")).default;
+    redisConnection = new IORedisModule(REDIS_URL, {
       maxRetriesPerRequest: null, // Required for BullMQ
       enableReadyCheck: false,
       retryStrategy(times) {
@@ -55,10 +58,12 @@ const queueEvents = new Map<QueueName, QueueEvents>();
 /**
  * Get or create a BullMQ queue
  */
-export function getQueue<T = unknown>(name: QueueName): Queue<T> {
+export async function getQueue<T = unknown>(name: QueueName): Promise<Queue<T>> {
   if (!queues.has(name)) {
-    const queue = new Queue<T>(name, {
-      connection: getRedisConnection() as unknown as ConnectionOptions,
+    const { Queue: QueueClass } = await import("bullmq");
+    const connection = await getRedisConnection();
+    const queue = new QueueClass<T>(name, {
+      connection: connection as unknown as ConnectionOptions,
       defaultJobOptions: {
         attempts: 3,
         backoff: {
@@ -85,10 +90,12 @@ export function getQueue<T = unknown>(name: QueueName): Queue<T> {
 /**
  * Get queue events for a queue (for monitoring)
  */
-export function getQueueEvents(name: QueueName): QueueEvents {
+export async function getQueueEvents(name: QueueName): Promise<QueueEvents> {
   if (!queueEvents.has(name)) {
-    const events = new QueueEvents(name, {
-      connection: getRedisConnection() as unknown as ConnectionOptions,
+    const { QueueEvents: QueueEventsClass } = await import("bullmq");
+    const connection = await getRedisConnection();
+    const events = new QueueEventsClass(name, {
+      connection: connection as unknown as ConnectionOptions,
     });
 
     queueEvents.set(name, events);
@@ -156,7 +163,7 @@ export class QueueClient {
     data: T,
     options?: JobOptions,
   ): Promise<JobResult> {
-    const queue = getQueue<T>(queueName);
+    const queue = await getQueue<T>(queueName);
 
     const job = await queue.add(queueName, data, {
       jobId: options?.jobId,
@@ -257,7 +264,7 @@ export class QueueClient {
 
     // Add jobs to each queue
     for (const [queueName, queueJobs] of jobsByQueue) {
-      const queue = getQueue<T>(queueName);
+      const queue = await getQueue<T>(queueName);
 
       const bulkJobs = queueJobs.map((job) => ({
         name: queueName,
@@ -391,7 +398,7 @@ export function getQueueClient(): QueueClient {
  * Create a BullMQ worker for a queue
  * Only used when USE_LOCAL_QUEUE=true
  */
-export function createWorker<T>(
+export async function createWorker<T>(
   queueName: QueueName,
   processor: JobProcessor<T>,
   options?: {
@@ -401,7 +408,7 @@ export function createWorker<T>(
       duration: number;
     };
   },
-): Worker<T> | null {
+): Promise<Worker<T> | null> {
   if (!USE_LOCAL_QUEUE) {
     console.warn(
       "[Queue] createWorker called but USE_LOCAL_QUEUE is not enabled",
@@ -409,7 +416,10 @@ export function createWorker<T>(
     return null;
   }
 
-  const worker = new Worker<T>(
+  const { Worker: WorkerClass } = await import("bullmq");
+  const connection = await getRedisConnection();
+
+  const worker = new WorkerClass<T>(
     queueName,
     async (job) => {
       const ctx = {
@@ -435,7 +445,7 @@ export function createWorker<T>(
       }
     },
     {
-      connection: getRedisConnection() as unknown as ConnectionOptions,
+      connection: connection as unknown as ConnectionOptions,
       concurrency: options?.concurrency ?? 10,
       limiter: options?.limiter,
     },

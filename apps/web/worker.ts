@@ -10,7 +10,7 @@
  *   node apps/web/worker.js
  */
 
-import { Worker } from "bullmq";
+import type { Worker } from "bullmq";
 import { createWorker, QUEUE_NAMES, getRedisConnection } from "./lib/queue/client";
 import { processWebhookJob } from "./lib/queue/workers/webhook-worker";
 import { processWorkflowJob } from "./lib/queue/workers/workflow-worker";
@@ -36,7 +36,7 @@ const workers: Worker[] = [];
  */
 async function startWorkers() {
   // Webhook worker - high concurrency for webhook delivery
-  const webhookWorker = createWorker<WebhookJobData>(
+  const webhookWorker = await createWorker<WebhookJobData>(
     QUEUE_NAMES.WEBHOOKS,
     processWebhookJob,
     {
@@ -54,7 +54,7 @@ async function startWorkers() {
   }
 
   // Workflow worker - moderate concurrency for complex workflows
-  const workflowWorker = createWorker<WorkflowJobData>(
+  const workflowWorker = await createWorker<WorkflowJobData>(
     QUEUE_NAMES.WORKFLOWS,
     processWorkflowJob,
     {
@@ -72,7 +72,7 @@ async function startWorkers() {
   }
 
   // Batch job worker - lower concurrency for resource-intensive jobs
-  const batchWorker = createWorker<BatchJobData>(
+  const batchWorker = await createWorker<BatchJobData>(
     QUEUE_NAMES.BATCH_JOBS,
     processBatchJob,
     {
@@ -111,7 +111,7 @@ async function shutdown(signal: string) {
 
   // Close Redis connection
   try {
-    const redis = getRedisConnection();
+    const redis = await getRedisConnection();
     await redis.quit();
   } catch (error) {
     console.error("[Worker] Error closing Redis connection:", error);
