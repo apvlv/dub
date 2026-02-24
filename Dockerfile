@@ -64,7 +64,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
-RUN pnpm prisma:generate
+RUN pnpm --filter @dub/prisma generate
 
 # Expose ports
 EXPOSE 3000 9229 5555
@@ -88,7 +88,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
-RUN pnpm prisma:generate
+RUN pnpm --filter @dub/prisma generate
 
 # Build the application
 RUN pnpm build
