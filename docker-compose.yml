@@ -85,12 +85,6 @@ services:
       start_period: 60s
     networks:
       - dub-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dub.rule=Host(`${APP_DOMAIN:-localhost}`)"
-      - "traefik.http.routers.dub.entrypoints=websecure"
-      - "traefik.http.routers.dub.tls.certresolver=letsencrypt"
-      - "traefik.http.services.dub.loadbalancer.server.port=3000"
 
   # ===================
   # Background Worker
