@@ -40,7 +40,6 @@ COPY packages/utils/package.json ./packages/utils/
 COPY packages/email/package.json ./packages/email/
 COPY packages/tailwind-config/package.json ./packages/tailwind-config/
 COPY packages/tsconfig/package.json ./packages/tsconfig/
-COPY packages/tinybird/package.json ./packages/tinybird/
 COPY packages/cli/package.json ./packages/cli/
 COPY packages/stripe-app/package.json ./packages/stripe-app/
 COPY packages/hubspot-app/package.json ./packages/hubspot-app/
